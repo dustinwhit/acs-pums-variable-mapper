@@ -1,5 +1,3 @@
-<meta name='keywords' content='American Community Survey, ACS, Public Use Microdata Sample, PUMS, variable mapper, dictionary mapper'>
-
 # American Community Survey (ACS) Public Use Microdata Sample (PUMS) Variable Mapper
 
 ## Description
@@ -15,49 +13,50 @@ This tool imports U.S. Census Bureau American Community Survey (ACS) Public Use 
 
 The processed dataset includes human-readable values for coded variables, making it easier to analyze and interpret the data.
 
-# Usage
+## Usage
 
-## Python dependencies
+### Python dependencies
 
 ```.ps1
 python -m pip install numpy pandas requests
 ```
 
-## Functions
+### Functions
 
-### `zipfile_download`
+#### `zipfile_download`
 
 ```.py
 zipfile_download(url, directory)
 ```
 
-#### Description
+##### Description
 
 - Downloads and extracts a .zip file from a given URL into a specified directory.
 
-#### Parameters
+##### Parameters
+
 - `url`: _str_. The URL of the .zip file.
 - `directory`: _str_. The directory where the .zip file contents will be extracted.
 
-
-### `acs_pums_variable_mapper`
+#### `acs_pums_variable_mapper`
 
 ```.py
 acs_pums_variable_mapper(df, acs_pums_data_dictionary_path=None, acs_pums_data_dictionary_url=None, survey_level='Person-Level')
 ```
 
-#### Description
+##### Description
+
 - Maps coded variable values in a PUMS dataset to their corresponding labels based on the ACS PUMS Data Dictionary.
 
-#### Parameters
+##### Parameters
+
 - `df`: _DataFrame_. The input DataFrame containing PUMS data.
 - `acs_pums_data_dictionary_path`: _str_. Path to the local ACS PUMS Data Dictionary file.
 - `acs_pums_data_dictionary_url`: _str_. URL to the online ACS PUMS Data Dictionary file.
 - `survey_level`: _str_. The survey level for mapping ('Person-Level' or 'Housing-Level').
 - `skip_variables`: _str list_. A list of variables/columns to skip during the mapping process. Defaults to an empty list.
 
-
-## Code Workflow Example
+### Code Workflow Example
 
 ```.py
 # Import packages
@@ -92,7 +91,7 @@ american_community_survey_df = acs_pums_variable_mapper(
     df=american_community_survey_df,
     acs_pums_data_dictionary_url='https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2023.txt',
     survey_level='Person-Level',
-	skip_variables=['AGEP', 'WKHP', 'WAGP'],
+ skip_variables=['AGEP', 'WKHP', 'WAGP'],
 )
 
 # Alternative using local file
@@ -185,7 +184,7 @@ american_community_survey_df = american_community_survey_df.filter(
 american_community_survey_df.to_csv(path_or_buf=os.path.join(os.path.expanduser('~'), 'Downloads', 'american-community-survey.csv'), sep=',', na_rep='', header=True, index=False, index_label=None, encoding='utf-8')
 ```
 
-# Documentation
+## Documentation
 
 - [ACS PUMS Technical Documentation](https://www.census.gov/programs-surveys/acs/technical-documentation.html)
 - [ACS PUMS Data Dictionary 2023](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2023.txt)
