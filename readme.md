@@ -56,6 +56,26 @@ acs_pums_variable_mapper(df, acs_pums_data_dictionary_path=None, acs_pums_data_d
 - `survey_level`: _str_. The survey level for mapping ('Person-Level' or 'Housing-Level').
 - `skip_variables`: _str list_. A list of variables/columns to skip during the mapping process. Defaults to an empty list.
 
+
+#### `fetch_acs_table_names`
+
+```.py
+fetch_acs_table_names(year=2023, dataset="acs/acs5")
+```
+
+##### Description
+
+- Retrieves a list of table names available in the ACS dataset.
+
+#### `download_acs_tables`
+
+```.py
+download_acs_tables(year=2023, dataset="acs/acs5", geography="us:*", output_directory=".")
+```
+
+##### Description
+
+- Downloads all tables returned by `fetch_acs_table_names` and saves them as `.csv` files.
 ### Code Workflow Example
 
 ```.py
