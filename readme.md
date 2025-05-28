@@ -2,7 +2,7 @@
 
 ## Description
 
-This tool imports U.S. Census Bureau American Community Survey (ACS) Public Use Microdata Sample (PUMS) data and maps variables/columns values using the official ACS PUMS Data Dictionary. It was tested for ACS 2023 1-Year PUMS data and provides the following features:
+This tool imports U.S. Census Bureau American Community Survey (ACS) Public Use Microdata Sample (PUMS) data and maps variables/columns values using the official ACS PUMS data dictionary. It supports multiple ACS years and table groups and provides the following features:
 
 - **Variable Mapping**: Automatically maps coded values in PUMS data to their corresponding labels using the official ACS PUMS Data Dictionary.
 - **Local or Online Data Dictionary**: Allows mapping using either a local file or a URL to the official data dictionary.
@@ -41,7 +41,14 @@ zipfile_download(url, directory)
 #### `acs_pums_variable_mapper`
 
 ```.py
-acs_pums_variable_mapper(df, acs_pums_data_dictionary_path=None, acs_pums_data_dictionary_url=None, survey_level='Person-Level')
+acs_pums_variable_mapper(
+    df,
+    acs_pums_data_dictionary_path=None,
+    acs_pums_data_dictionary_url=None,
+    acs_year=None,
+    table_group='1-Year',
+    survey_level='Person-Level',
+)
 ```
 
 ##### Description
@@ -53,6 +60,8 @@ acs_pums_variable_mapper(df, acs_pums_data_dictionary_path=None, acs_pums_data_d
 - `df`: _DataFrame_. The input DataFrame containing PUMS data.
 - `acs_pums_data_dictionary_path`: _str_. Path to the local ACS PUMS Data Dictionary file.
 - `acs_pums_data_dictionary_url`: _str_. URL to the online ACS PUMS Data Dictionary file.
+- `acs_year`: _str_. ACS survey year. Used when no path or URL is provided.
+- `table_group`: _str_. Table group within the ACS year (e.g., '1-Year').
 - `survey_level`: _str_. The survey level for mapping ('Person-Level' or 'Housing-Level').
 - `skip_variables`: _str list_. A list of variables/columns to skip during the mapping process. Defaults to an empty list.
 
@@ -84,10 +93,16 @@ import os
 import numpy as np
 import pandas as pd
 
-# Download American Community Survey (ACS) Public Use Microdata Sample (PUMS) Person-Level Records for Wyoming (WY)
-zipfile_download(url='https://www2.census.gov/programs-surveys/acs/data/pums/2023/1-Year/csv_pny.zip', directory=os.path.join(os.path.expanduser('~'), 'Downloads'))
+ACS_YEAR = '2023'
+TABLE_GROUP = '1-Year'
 
-# Import American Community Survey (ACS) dataset (Source: https://www2.census.gov/programs-surveys/acs/data/pums/2023/1-Year/)
+# Download American Community Survey (ACS) Public Use Microdata Sample (PUMS) Person-Level Records for Wyoming (WY)
+zipfile_download(
+    url=f'https://www2.census.gov/programs-surveys/acs/data/pums/{ACS_YEAR}/{TABLE_GROUP}/csv_pny.zip',
+    directory=os.path.join(os.path.expanduser('~'), 'Downloads'),
+)
+
+# Import American Community Survey (ACS) dataset
 american_community_survey_df = pd.read_csv(
     filepath_or_buffer=os.path.join(os.path.expanduser('~'), 'Downloads', 'psam_p36.csv'),
     sep=',',
@@ -109,13 +124,19 @@ american_community_survey_df = american_community_survey_df.filter(
 # Map variables/columns values using the official ACS PUMS Data Dictionary
 american_community_survey_df = acs_pums_variable_mapper(
     df=american_community_survey_df,
-    acs_pums_data_dictionary_url='https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2023.txt',
+    acs_year=ACS_YEAR,
+    table_group=TABLE_GROUP,
     survey_level='Person-Level',
- skip_variables=['AGEP', 'WKHP', 'WAGP'],
+    skip_variables=['AGEP', 'WKHP', 'WAGP'],
 )
 
 # Alternative using local file
-# american_community_survey_df = acs_pums_variable_mapper(df=american_community_survey_df, acs_pums_data_dictionary_path=os.path.join(os.path.expanduser('~'), 'Downloads', 'PUMS_Data_Dictionary_2023.txt'), survey_level = 'Person-Level', skip_variables=['AGEP', 'WKHP', 'WAGP'])
+# american_community_survey_df = acs_pums_variable_mapper(
+#     df=american_community_survey_df,
+#     acs_pums_data_dictionary_path=os.path.join(os.path.expanduser('~'), 'Downloads', f'PUMS_Data_Dictionary_{ACS_YEAR}.txt'),
+#     survey_level='Person-Level',
+#     skip_variables=['AGEP', 'WKHP', 'WAGP'],
+# )
 
 
 # Create "OCCP_SOC_Code" column
@@ -207,5 +228,5 @@ american_community_survey_df.to_csv(path_or_buf=os.path.join(os.path.expanduser(
 ## Documentation
 
 - [ACS PUMS Technical Documentation](https://www.census.gov/programs-surveys/acs/technical-documentation.html)
-- [ACS PUMS Data Dictionary 2023](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2023.txt)
+- [ACS PUMS Data Dictionaries](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/)
 - [ACS PUMS Data through File Transfer Protocol (FTP)](https://www2.census.gov/programs-surveys/acs/data/pums/)

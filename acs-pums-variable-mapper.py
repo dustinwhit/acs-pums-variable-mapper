@@ -2,24 +2,23 @@
 # Last update: 2025-01-03
 
 
-"""About: Import U.S. Census Bureau American Community Survey (ACS) Public Use Microdata Sample (PUMS) data and map variables/columns values using the official ACS PUMS Data Dictionary. Tested for ACS 2023 1-Year PUMS."""
+"""About: Import U.S. Census Bureau American Community Survey (ACS) Public Use Microdata Sample (PUMS) data and map variables/columns values using the official ACS PUMS data dictionary."""
 
 
 ###############
 # Initial Setup
 ###############
 
-# Erase all declared global variables
-globals().clear()
-
 
 # Import packages
 from io import BytesIO, StringIO
 import re
 from zipfile import ZipFile, ZIP_DEFLATED
-
 import pandas as pd
 import requests
+
+# Erase all declared global variables
+globals().clear()
 
 
 # Settings
@@ -39,9 +38,38 @@ def zipfile_download(*, url, directory):
         zip_file.extractall(path=directory)
 
 
-def acs_pums_variable_mapper(*, df, acs_pums_data_dictionary_path=None, acs_pums_data_dictionary_url=None, survey_level='Person-Level', skip_variables=[]):
-    if acs_pums_data_dictionary_path is None and acs_pums_data_dictionary_url is None:
-        raise ValueError('Either "acs_pums_data_dictionary_path" or "acs_pums_data_dictionary_url" needs to be defined.')
+def get_acs_pums_data_dictionary(*, year, table_group='1-Year'):
+    """Fetch the ACS PUMS data dictionary for a specific year and table group."""
+
+    # Construct URL based on year and table group
+    url = (
+        'https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/'
+        f'PUMS_Data_Dictionary_{year}.txt'
+    )
+    response = requests.get(url=url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5, verify=True)
+    response.raise_for_status()
+    return StringIO(response.content.decode('utf-8')).readlines()
+
+
+def acs_pums_variable_mapper(
+    *,
+    df,
+    acs_pums_data_dictionary_path=None,
+    acs_pums_data_dictionary_url=None,
+    acs_year=None,
+    table_group='1-Year',
+    survey_level='Person-Level',
+    skip_variables=[],
+):
+    if (
+        acs_pums_data_dictionary_path is None
+        and acs_pums_data_dictionary_url is None
+        and acs_year is None
+    ):
+        raise ValueError(
+            'Either "acs_pums_data_dictionary_path", "acs_pums_data_dictionary_url", '
+            'or "acs_year" needs to be defined.'
+        )
 
     # Create a copy of the original DataFrame to avoid modifying it
     df = df.copy()
@@ -49,9 +77,17 @@ def acs_pums_variable_mapper(*, df, acs_pums_data_dictionary_path=None, acs_pums
     if acs_pums_data_dictionary_path is not None:
         with open(file=acs_pums_data_dictionary_path, encoding='utf-8') as file:
             file_content = file.readlines()
-
-    if acs_pums_data_dictionary_url is not None:
-        file_content = StringIO(requests.get(url=acs_pums_data_dictionary_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5, verify=True).content.decode('utf-8')).readlines()
+    elif acs_pums_data_dictionary_url is not None:
+        file_content = StringIO(
+            requests.get(
+                url=acs_pums_data_dictionary_url,
+                headers={'User-Agent': 'Mozilla/5.0'},
+                timeout=5,
+                verify=True,
+            ).content.decode('utf-8')
+        ).readlines()
+    elif acs_year is not None:
+        file_content = get_acs_pums_data_dictionary(year=acs_year, table_group=table_group)
 
     # Initialize lines to select based on the survey_level
     lines = []
