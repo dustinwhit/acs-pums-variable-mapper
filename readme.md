@@ -65,6 +65,25 @@ acs_pums_variable_mapper(
 - `survey_level`: _str_. The survey level for mapping ('Person-Level' or 'Housing-Level').
 - `skip_variables`: _str list_. A list of variables/columns to skip during the mapping process. Defaults to an empty list.
 
+#### `bulk_process_pums_datasets`
+
+```py
+bulk_process_pums_datasets(
+    datasets,
+    acs_pums_data_dictionary_path=None,
+    acs_pums_data_dictionary_url=None,
+    acs_year=None,
+    table_group='1-Year',
+    survey_level='Person-Level',
+    skip_variables=None,
+)
+```
+
+##### Description
+
+- Iterates over each DataFrame in ``datasets`` and applies ``acs_pums_variable_mapper``.
+- Returns a dictionary of processed DataFrames keyed by table name.
+
 
 #### `fetch_acs_table_names`
 
